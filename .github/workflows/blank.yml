@@ -38,13 +38,13 @@ jobs:
       run: |
         ./configure --prefix=/usr/local --openssl-is-fips
         make -j8
-        make install
+        sudo make install
       working-directory: /opt/nodejs
     - name: Package nodejs ${{ env.NODEJS_VERSION }}-r${{ env.RELEASE_BUILD }}
       run: |
-        cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/lib/openssl-modules/ /usr/local/lib/
-        mkdir -p /usr/local/etc
-        cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/fipsmodule.cnf /usr/local/etc/fipsmodule.cnf
+        sudo cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/lib/openssl-modules/ /usr/local/lib/
+        sudo mkdir -p /usr/local/etc
+        sudo cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/fipsmodule.cnf /usr/local/etc/fipsmodule.cnf
         tar --create --file=nodejs-$NODEJS_VERSION-r$RELEASE_BUILD.tar.xz --directory=/usr/local --xz --verbose --utc bin/ share/ lib/ include/ etc/
       working-directory: /tmp
     - name: Create GitHub release
