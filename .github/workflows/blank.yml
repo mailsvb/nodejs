@@ -20,8 +20,9 @@ jobs:
         sudo apt install -y git python3 python3-pkgconfig gcc-13 g++-13 perl make nasm libtext-template-perl build-essential
         sudo snap install node --classic --channel=20
     - name: Download nodejs ${{ env.NODEJS_VERSION }}
-      run: git -C /opt clone --depth 1 --branch v$NODEJS_VERSION https://github.com/nodejs/node.git nodejs
-      working-directory: /opt
+      run: |
+        git -C /opt clone --depth 1 --branch v$NODEJS_VERSION https://github.com/nodejs/node.git nodejs
+        mkdir -p /tmp/local/{lib,etc,bin,share,include}
     - name: Update nodejs ${{ env.NODEJS_VERSION }}
       run: |
         ./tools/dep_updaters/update-nghttp2.sh
@@ -36,16 +37,15 @@ jobs:
       working-directory: /opt/nodejs
     - name: Build nodejs ${{ env.NODEJS_VERSION }}
       run: |
-        ./configure --prefix=/usr/local --openssl-is-fips
+        ./configure --prefix=/tmp/local --openssl-is-fips
         make -j8
-        sudo make install
+        make install
       working-directory: /opt/nodejs
     - name: Package nodejs ${{ env.NODEJS_VERSION }}-r${{ env.RELEASE_BUILD }}
       run: |
-        sudo cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/lib/openssl-modules/ /usr/local/lib/
-        sudo mkdir -p /usr/local/etc
-        sudo cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/fipsmodule.cnf /usr/local/etc/fipsmodule.cnf
-        tar --create --file=nodejs-$NODEJS_VERSION-r$RELEASE_BUILD.tar.xz --directory=/usr/local --xz --verbose --utc bin/ share/ lib/ include/ etc/
+        cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/lib/openssl-modules/ /tmp/local/lib/
+        cp -R /opt/nodejs/out/Release/obj.target/deps/openssl/fipsmodule.cnf /tmp/local/etc/fipsmodule.cnf
+        tar --create --file=nodejs-$NODEJS_VERSION-r$RELEASE_BUILD.tar.xz --directory=/tmp/local --xz --verbose --utc bin/ share/ lib/ include/ etc/
       working-directory: /tmp
     - name: Create GitHub release
       id: create-new-release
