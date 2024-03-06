@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODEJS_VERSION: 20.11.1
-      RELEASE_BUILD: 1
+      NPM_VERSION: 10.5.0
+      RELEASE_BUILD: 2
 
     steps:
     - name: Install build tools
@@ -28,7 +29,8 @@ jobs:
         ./tools/dep_updaters/update-nghttp2.sh
         sed -i 's/nghttp2_npn.c/nghttp2_alpn.c/g' deps/nghttp2/nghttp2.gyp
         echo y | ./tools/dep_updaters/update-undici.sh
-        ./tools/dep_updaters/update-npm.sh 10.4.0
+        ./tools/dep_updaters/update-zlib.sh
+        ./tools/dep_updaters/update-npm.sh $NPM_VERSION
       working-directory: /opt/nodejs
     - name: Build OpenSSL
       run: |
